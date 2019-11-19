@@ -4,15 +4,20 @@ import axios from 'axios'
 
 const App = () => {
   const [weatherData, setWeatherData] = useState({})
-  const [locationData, setLocationData] = useState({})
+  const [locationData, setLocationData] = useState('Stockholm')
 
   useEffect(async () => {
+    await getWeatherFromSMHI()
+  }, [])
+
+  const getWeatherFromSMHI = async (lat, long) => {
+    let latitude = lat || 59.334591
+    let longitude = long || 18.063240
     const response = await axios.get(
-      'https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/18.063240/lat/59.334591/data.json'
+      `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${longitude}/lat/${latitude}/data.json`
     )
     setWeatherData(response.data)
-
-  }, [])
+  }
 
   const getLocationFromZipCode = async (zipcode) => {
     let locationData = await axios.get(`http://api.zippopotam.us/se/${zipcode.replace(/\s/g, '')}`)
@@ -68,16 +73,17 @@ const App = () => {
   const handleFormSubmit = async (event) => {
     event.preventDefault()
     let data = await getLocationFromZipCode(event.target.zipcode.value)
-    debugger
-
+    getWeatherFromSMHI(data.latitude, data.longitude)
+    setLocationData(data["place name"])
   }
+
   return (
     <Container>
       <form onSubmit={(e) => handleFormSubmit(e)}>
         <input type="text" name="zipcode" />
         <input type="submit" value="Skicka" />
       </form>
-      <Header as="h2">SMHI Prognos för Stockholm</Header>
+      <Header as="h2">SMHI Prognos för {locationData}</Header>
       <p>Current temperature is {getTemperature()} &#8304;</p>
       <p> {getCurrentConditions()}</p>
     </Container>
