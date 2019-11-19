@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Container, Header } from 'semantic-ui-react'
+import { Container, Header, Form, Button } from 'semantic-ui-react'
+import { PRECIP_TYPE, WEATHER_VALUES, degToCompass } from './weatherConstants'
 import axios from 'axios'
 
 const App = () => {
@@ -24,49 +25,19 @@ const App = () => {
     return locationData.data.places[0]
   }
 
-  const getTemperature = () => {
+  const getParamValue = (paramName) => {
     if (Object.entries(weatherData).length > 0) {
-      let temperatureParam = weatherData.timeSeries[0].parameters.filter(param => param.name == 't')
-      let temperature = temperatureParam[0].values[0]
-      return temperature
+      const paramData = weatherData.timeSeries[0].parameters.filter(param => param.name === paramName)
+      const value = paramData[0].values[0]
+      return value
     }
   }
 
-  const getCurrentConditions = () => {
+  const getParamValueFromList = (paramName, list) => {
     if (Object.entries(weatherData).length > 0) {
-      let currentConditionsParam = weatherData.timeSeries[0].parameters.filter(param => param.name == 'Wsymb2')
-      // debugger
-      let currentConditions = currentConditionsParam[0].values[0]
-      const weatherValues = [
-        'Clear sky',
-        'Nearly clear sky',
-        'Variable cloudiness',
-        'Halfclear sky',
-        'Cloudy sky',
-        'Overcast',
-        'Fog',
-        'Light rain showers',
-        'Moderate rain showers',
-        'Heavy rain showers',
-        'Thunderstorm',
-        'Light sleet showers',
-        'Moderate sleet showers',
-        'Heavy sleet showers',
-        'Light snow showers',
-        'Moderate snow showers',
-        'Heavy snow showers',
-        'Light rain',
-        'Moderate rain',
-        'Heavy rain',
-        'Thunder',
-        'Light sleet',
-        'Moderate sleet',
-        'Heavy sleet',
-        'Light snowfall',
-        'Moderate snowfall',
-        'Heavy snowfall'
-      ]
-      return weatherValues[currentConditions - 1]
+      const paramData = weatherData.timeSeries[0].parameters.filter(param => param.name === paramName)
+      const index = paramData[0].values[0]
+      return list[index]
     }
   }
 
@@ -79,13 +50,24 @@ const App = () => {
 
   return (
     <Container>
-      <form onSubmit={(e) => handleFormSubmit(e)}>
-        <input type="text" name="zipcode" />
-        <input type="submit" value="Skicka" />
-      </form>
-      <Header as="h2">SMHI Prognos för {locationData}</Header>
-      <p>Current temperature is {getTemperature()} &#8304;</p>
-      <p> {getCurrentConditions()}</p>
+      <Header as="h2">Search by Swedish Zip code</Header>
+      <Form onSubmit={(e) => handleFormSubmit(e)}>
+        <Form.Input
+          label="Swedish zipcode"
+          action="Submit"
+          name="zipcode"
+          width={4} />
+      </Form>
+      <Header as="h2">SMHI Prognos for {locationData}</Header>
+      <Header as="p">Current temperature is {getParamValue("t")} &#8304;</Header>
+      <Header as="p">Condition: {getParamValueFromList("Wsymb2", WEATHER_VALUES)}</Header>
+      <Header as="p">Precipitation type is: {getParamValueFromList("pcat", PRECIP_TYPE)}</Header>
+      <Header as="p">Wind speed is {getParamValue("ws")} m/s</Header>
+      <Header as="p">Wind direction is {`${getParamValue("wd")} degrees (${degToCompass(getParamValue("wd"))})`} </Header>
+      <Header as="p">Wind gust is {getParamValue("gust")} m/s</Header>
+      <Header as="p">Air pressure is {getParamValue("msl")} hPa</Header>
+      <Header as="p">Precipition intensity is between {getParamValue("pmin")} and {getParamValue("pmax")} mm/h</Header>
+      <Header as="p">Thunder probability is {getParamValue("tstm")} %</Header>
     </Container>
   )
 }
