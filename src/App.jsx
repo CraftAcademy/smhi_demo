@@ -14,9 +14,9 @@ const App = () => {
 
   }, [])
 
-  const getLocationFromZipCode =  async (zipcode) => {
-    let locationData = await axios.get(`http://api.zippopotam.us/se/${zipcode.replace(/\s/g,'')}`)
-
+  const getLocationFromZipCode = async (zipcode) => {
+    let locationData = await axios.get(`http://api.zippopotam.us/se/${zipcode.replace(/\s/g, '')}`)
+    return locationData.data.places[0]
   }
 
   const getTemperature = () => {
@@ -64,8 +64,19 @@ const App = () => {
       return weatherValues[currentConditions - 1]
     }
   }
+
+  const handleFormSubmit = async (event) => {
+    event.preventDefault()
+    let data = await getLocationFromZipCode(event.target.zipcode.value)
+    debugger
+
+  }
   return (
     <Container>
+      <form onSubmit={(e) => handleFormSubmit(e)}>
+        <input type="text" name="zipcode" />
+        <input type="submit" value="Skicka" />
+      </form>
       <Header as="h2">SMHI Prognos för Stockholm</Header>
       <p>Current temperature is {getTemperature()} &#8304;</p>
       <p> {getCurrentConditions()}</p>
