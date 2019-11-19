@@ -4,6 +4,7 @@ import axios from 'axios'
 
 const App = () => {
   const [weatherData, setWeatherData] = useState({})
+  const [locationData, setLocationData] = useState({})
 
   useEffect(async () => {
     const response = await axios.get(
@@ -12,6 +13,11 @@ const App = () => {
     setWeatherData(response.data)
 
   }, [])
+
+  const getLocationFromZipCode =  async (zipcode) => {
+    let locationData = await axios.get(`http://api.zippopotam.us/se/${zipcode.replace(/\s/g,'')}`)
+
+  }
 
   const getTemperature = () => {
     if (Object.entries(weatherData).length > 0) {
